@@ -1,0 +1,135 @@
+import java.util.*;
+
+public class BucketSort {
+	
+	public static double[] arr;
+	public static int Max;
+	public static int Comparisons = 0;
+	
+	/* Timing for each (approx and using nanotime) ~Also the current nanoseconds add the printing time so not as accuarate
+	 * Each number is generally the average(or shortest for when I'm lazy) of a bunch of time's I did it
+	 * 
+	 * Random Array
+	 * 5 Elements: 21E-5 seconds
+	 * 25 Elements: 35E-5 seconds
+	 * 100 Elements: 62E-5 seconds
+	 * 
+	 * Sorted Array
+	 * 5 Elements: 15E-5 seconds
+	 * 25 Elements: 22E-5 seconds
+	 * 100 Elements: 31E-5 seconds
+	 * 
+	 * Reverse Array
+	 * 5 Elements: 15E-5 seconds
+	 * 25 Elements: 22E-5 seconds
+	 * 100 Elements: 33E-5 seconds
+	 */
+	
+	//Since I have no idea how much buckets is the best amount, I use the same amount of buckets as elements
+	public static void main(String[] args) {
+		
+		Scanner in = new Scanner(System.in);
+		
+		System.out.print("Enter how much elements: ");
+		int numE = in.nextInt();
+		System.out.println();
+		
+		System.out.print("Which type of array\n1) Random\n2) Sorted\n3) Reverse\n:");
+		int x = in.nextInt();
+		
+		if(x == 1) {
+			createArr(numE);
+		}
+		else if (x == 2) {
+			sortedArr(numE);
+		}
+		else {
+			reverArr(numE);
+		}
+		
+		System.out.println("\nStarting Array");
+		printArr();
+		
+		long temp = System.nanoTime();
+		System.out.println("\n~~~");
+		sort(numE);
+		System.out.println("\nFinal Array");
+		printArr();
+		
+		System.out.println("\nNanoseconds: " + ((System.nanoTime() - temp)));
+	}
+	
+	//creates an array to len Lenghth
+	public static void createArr(int len) {
+		arr = new double[len];
+		//The max size will be 5 times the length
+		Max = len*5-1;
+		for(int i = 0; i < len; i++) {
+			arr[i] = (Math.random()*(Max));
+		}
+	}
+	
+	public static void sortedArr(int len) {
+		Max = len;
+		arr = new double[len];
+		for(int i = 0; i < len; i++) {
+			arr[i] = i;
+		}
+	}
+	
+	public static void reverArr(int len) {
+		Max = len;
+		arr = new double[len];
+		for(int i = 0; i < len; i++) {
+			arr[i] = len-i-1;
+		}
+	}
+	
+	public static void printArr() {
+		for(int i = 0; i < arr.length; i++) {
+			System.out.printf(" %.1f", arr[i]);
+		}
+		System.out.println();
+	}
+	
+	public static void sort(int numBucket) {
+		ArrayList<ArrayList<Double>> Buckets = new ArrayList<ArrayList<Double>>();
+		
+		//Creates numBucket buckets
+		for(int i = 0; i < numBucket; i++) {
+			Buckets.add(new ArrayList<Double>());
+		}
+		
+		//Adds each element of the array to the buckets using the equation shown below
+		for(int i = 0; i < arr.length; i++) {
+			Buckets.get((int)(arr[i]/(Max*1.0/(numBucket)))).add(arr[i]);
+			Comparisons++;
+		}
+		
+		//Uses insertion sort to sort each bucket
+		for(int i = 0; i < Buckets.size(); i++) {
+			for(int ii = 1; ii < Buckets.get(i).size(); ii++) {
+				double x = Buckets.get(i).get(ii);
+				int y = ii-1;
+				
+				while(y >= 0 && Buckets.get(i).get(y) > x) {
+					Buckets.get(i).set(y+1, Buckets.get(i).get(y));
+					y--;
+					Comparisons++;
+				}
+				Buckets.get(i).set(y+1, x);
+			}
+		}
+		
+		//adds everything back into the original list
+		int ind = 0;
+		for(int i = 0; i < Buckets.size(); i++) {
+			for(int ii = 0; ii < Buckets.get(i).size(); ii++) {
+				arr[ind] = Buckets.get(i).get(ii);
+				ind++;
+				Comparisons++;
+			}
+		}
+		
+	}
+}
